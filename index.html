@@ -190,7 +190,7 @@ select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:
     <button class="stab" onclick="gTab('cmp')">期間比較</button>
     <button class="stab" onclick="gTab('scout')">🔍 対戦チーム分析</button>
     <button class="stab" onclick="gTab('award')">🏅 月間アワード</button>
-    <button class="stab" onclick="gTab('shot')">🏀 シュート分布</button>
+
   </div>
   <div id="gs-single" class="ssec active">
     <select id="gSel" onchange="renderSingle()"><option value="">試合を選択...</option></select>
@@ -274,102 +274,7 @@ select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:
       </div>
     </div>
   </div>
-  <!-- ===== シュート分布セクション ===== -->
-  <div id="gs-shot" class="ssec">
-    <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:.5rem;">🏀 擬似ゾーン別シュート分布</div>
-    <div style="font-size:10px;color:var(--text2);margin-bottom:.8rem;">2P/3P/FTの本数・成功率をコート図の各ゾーンに色の濃淡で表示します。<br>※ 座標データがないため、2PAはペイント内70%・ミドル30%で按分した推定値です。</div>
-    <select id="shotGameSel" onchange="renderShotChart()" style="margin-bottom:.8rem;"></select>
-    <!-- 凡例 -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:.8rem;font-size:10px;color:var(--text2);align-items:center;">
-      <span style="font-weight:600;">色の濃さ＝成功率：</span>
-      <span><span style="display:inline-block;width:12px;height:12px;background:#dbeafe;border:1px solid #93c5fd;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>低(&lt;30%)</span>
-      <span><span style="display:inline-block;width:12px;height:12px;background:#60a5fa;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>中(30-50%)</span>
-      <span><span style="display:inline-block;width:12px;height:12px;background:#1d4ed8;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>高(50%以上)</span>
-      <span><span style="display:inline-block;width:12px;height:12px;background:#f3f4f6;border:1px solid #d1d5db;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>0本</span>
-    </div>
-    <!-- コート図 + 数値カード -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;">
-      <!-- コート図SVG -->
-      <div>
-        <svg id="shotCourtSvg" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);">
-          <!-- ゾーン塗り（JS更新） -->
-          <rect id="sz-3pL"   x="2"   y="8"  width="46"  height="185" rx="3" fill="#f3f4f6" opacity="0.95"/>
-          <rect id="sz-3pR"   x="252" y="8"  width="46"  height="185" rx="3" fill="#f3f4f6" opacity="0.95"/>
-          <rect id="sz-midL"  x="48"  y="8"  width="60"  height="185" rx="3" fill="#f3f4f6" opacity="0.95"/>
-          <rect id="sz-midR"  x="192" y="8"  width="60"  height="185" rx="3" fill="#f3f4f6" opacity="0.95"/>
-          <rect id="sz-paint" x="108" y="8"  width="84"  height="185" rx="3" fill="#f3f4f6" opacity="0.95"/>
-          <!-- コートライン -->
-          <g stroke="#9ca3af" stroke-width="1.5" fill="none">
-            <rect x="2" y="8" width="296" height="222" rx="4"/>
-            <rect x="95" y="8" width="110" height="118"/>
-            <circle cx="150" cy="126" r="38"/>
-            <circle cx="150" cy="126" r="5" fill="#9ca3af" stroke="none"/>
-            <path d="M2,158 Q150,215 298,158"/>
-            <line x1="2" y1="230" x2="298" y2="230"/>
-          </g>
-          <!-- ゾーンラベル（JS更新） -->
-          <g font-family="system-ui,sans-serif" text-anchor="middle" dominant-baseline="middle">
-            <!-- ペイント内 -->
-            <text id="szl-paint-n" x="150" y="52"  font-size="8"  fill="#6b7280">ペイント内</text>
-            <text id="szl-paint-s" x="150" y="65"  font-size="11" font-weight="bold" fill="#374151">0/0</text>
-            <text id="szl-paint-p" x="150" y="78"  font-size="9"  fill="#6b7280">-%</text>
-            <!-- ミドル左 -->
-            <text id="szl-midL-n"  x="78"  y="52"  font-size="7"  fill="#6b7280">ミドル左</text>
-            <text id="szl-midL-s"  x="78"  y="65"  font-size="10" font-weight="bold" fill="#374151">0/0</text>
-            <text id="szl-midL-p"  x="78"  y="77"  font-size="8"  fill="#6b7280">-%</text>
-            <!-- ミドル右 -->
-            <text id="szl-midR-n"  x="222" y="52"  font-size="7"  fill="#6b7280">ミドル右</text>
-            <text id="szl-midR-s"  x="222" y="65"  font-size="10" font-weight="bold" fill="#374151">0/0</text>
-            <text id="szl-midR-p"  x="222" y="77"  font-size="8"  fill="#6b7280">-%</text>
-            <!-- 3P左 -->
-            <text id="szl-3pL-n"   x="25"  y="52"  font-size="7"  fill="#6b7280">3P左</text>
-            <text id="szl-3pL-s"   x="25"  y="65"  font-size="9"  font-weight="bold" fill="#374151">0/0</text>
-            <text id="szl-3pL-p"   x="25"  y="76"  font-size="8"  fill="#6b7280">-%</text>
-            <!-- 3P右 -->
-            <text id="szl-3pR-n"   x="275" y="52"  font-size="7"  fill="#6b7280">3P右</text>
-            <text id="szl-3pR-s"   x="275" y="65"  font-size="9"  font-weight="bold" fill="#374151">0/0</text>
-            <text id="szl-3pR-p"   x="275" y="76"  font-size="8"  fill="#6b7280">-%</text>
-          </g>
-          <!-- FTバッジ -->
-          <rect x="55" y="200" width="86" height="22" rx="4" fill="#f0fdf4" stroke="#86efac" stroke-width="1"/>
-          <text id="szl-ft" x="98" y="214" font-family="system-ui,sans-serif" font-size="9" text-anchor="middle" fill="#166534">FT: 0/0 (-)</text>
-          <!-- 試合名ラベル -->
-          <text id="szl-title" x="150" y="235" font-family="system-ui,sans-serif" font-size="7" text-anchor="middle" fill="#9ca3af">試合を選択してください</text>
-        </svg>
-      </div>
-      <!-- 数値カード -->
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;">
-          <div style="font-size:10px;color:var(--text2);margin-bottom:2px;">ペイント内 2P</div>
-          <div id="sc-paint-pct" style="font-size:20px;font-weight:700;color:var(--blue);">-%</div>
-          <div id="sc-paint-sub" style="font-size:10px;color:var(--text2);">0 / 0 本</div>
-        </div>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;">
-          <div style="font-size:10px;color:var(--text2);margin-bottom:2px;">ミドルレンジ 2P</div>
-          <div id="sc-mid-pct" style="font-size:20px;font-weight:700;color:var(--blue);">-%</div>
-          <div id="sc-mid-sub" style="font-size:10px;color:var(--text2);">0 / 0 本</div>
-        </div>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;">
-          <div style="font-size:10px;color:var(--text2);margin-bottom:2px;">3ポイント</div>
-          <div id="sc-3p-pct" style="font-size:20px;font-weight:700;color:var(--blue);">-%</div>
-          <div id="sc-3p-sub" style="font-size:10px;color:var(--text2);">0 / 0 本</div>
-        </div>
-        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);padding:8px 10px;">
-          <div style="font-size:10px;color:#166534;margin-bottom:2px;">フリースロー</div>
-          <div id="sc-ft-pct" style="font-size:20px;font-weight:700;color:#166534;">-%</div>
-          <div id="sc-ft-sub" style="font-size:10px;color:#166534;">0 / 0 本</div>
-        </div>
-        <div style="background:var(--blue);border-radius:var(--r);padding:8px 10px;">
-          <div style="font-size:10px;color:rgba(255,255,255,.75);margin-bottom:2px;">FG合計 / 得点</div>
-          <div id="sc-fg-pct" style="font-size:20px;font-weight:700;color:#fff;">-%</div>
-          <div id="sc-fg-sub" style="font-size:10px;color:rgba(255,255,255,.8);">0 / 0 本 | 0pts</div>
-        </div>
-      </div>
-    </div>
-    <div style="font-size:10px;color:var(--text2);margin-top:10px;padding-top:8px;border-top:1px solid var(--border);">
-      ※ 2Pシュートの内訳（ペイント内/ミドル）は推定按分です。実際の座標データがある場合はより正確な表示に変更できます。
-    </div>
-  <!-- ===== /シュート分布セクション ===== -->
+
 <!-- 管理者タブ -->
 <div id="s-admin" class="sec" style="display:none;">
   <div id="adminLock">
@@ -1184,13 +1089,12 @@ function sw(t){
 }
 function gTab(t){
   closeAllModals();
-  document.querySelectorAll('.stab').forEach((x,i)=>x.classList.toggle('active',['single','range','avg','cmp','scout','award','shot'][i]===t));
+  document.querySelectorAll('.stab').forEach((x,i)=>x.classList.toggle('active',['single','range','avg','cmp','scout','award'][i]===t));
   document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('active'));
   document.getElementById('gs-'+t).classList.add('active');
   if(t==='avg') renderAllAvg();
   if(t==='scout') initScoutTab();
   if(t==='award') initAwardTab();
-  if(t==='shot') initShotChart();
   // タブ切替時に期間を同期
   if(t==='range'){
     const grFrom=document.getElementById('grFrom');
@@ -6964,112 +6868,7 @@ function renderPersonalAnalysis(){
     </table>`;
 }
 
-// ===== シュート分布機能 =====
-function initShotChart(){
-  const sel=document.getElementById('shotGameSel');
-  if(!sel) return;
-  sel.innerHTML='';
-  const games=ALL_GAMES||[];
-  games.forEach((g,i)=>{
-    if(!g||!g.opponent) return;
-    const won=g.ourScore>g.theirScore;
-    const opt=document.createElement('option');
-    opt.value=i;
-    opt.textContent=`#${i+1} ${g.opponent}戦 ${won?'○':'●'}${g.ourScore}-${g.theirScore}`;
-    sel.appendChild(opt);
-  });
-  renderShotChart();
-}
 
-function _shotZoneColor(p){
-  if(p===null) return '#f3f4f6';
-  if(p<30) return '#dbeafe';
-  if(p<50) return '#60a5fa';
-  return '#1d4ed8';
-}
-
-function _shotTextColor(p){
-  if(p===null) return '#9ca3af';
-  if(p<50) return '#1e3a8a';
-  return '#ffffff';
-}
-
-function renderShotChart(){
-  const sel=document.getElementById('shotGameSel');
-  if(!sel) return;
-  const idx=parseInt(sel.value);
-  const games=ALL_GAMES||[];
-  const g=games[idx];
-  if(!g) return;
-
-  // 全選手スタッツ合算
-  let FGM=0,FGA=0,FGM2=0,FGA2=0,FGM3=0,FGA3=0,FTM=0,FTA=0;
-  (g.players||[]).forEach(p=>{
-    FGM +=(p.FGM||0); FGA +=(p.FGA||0);
-    FGM2+=(p.FGM2||0); FGA2+=(p.FGA2||0);
-    FGM3+=(p.FGM3||0); FGA3+=(p.FGA3||0);
-    FTM +=(p.FTM||0); FTA +=(p.FTA||0);
-  });
-
-  // 2PAをペイント70% / ミドル30%に按分
-  const paintA=Math.round(FGA2*0.7), midA=FGA2-paintA;
-  const paintM=Math.round(FGM2*0.7), midM=FGM2-paintM;
-  // 左右は均等に按分
-  const midAL=Math.round(midA/2), midAR=midA-midAL;
-  const midML=Math.round(midM/2), midMR=midM-midML;
-  const threeAL=Math.round(FGA3/2), threeAR=FGA3-threeAL;
-  const threeML=Math.round(FGM3/2), threeMR=FGM3-threeML;
-
-  const pct=(m,a)=>a===0?null:Math.round(m/a*100);
-  const fmt=(m,a)=>{const p=pct(m,a);return p===null?'-':p+'%';};
-
-  const paintPct=pct(FGM2,FGA2);
-  const midPct  =pct(midM,midA);
-  const threePct=pct(FGM3,FGA3);
-
-  // SVGゾーン色更新
-  const setZone=(id,p)=>{
-    const el=document.getElementById(id);
-    if(el) el.setAttribute('fill',_shotZoneColor(p));
-  };
-  setZone('sz-paint',paintPct);
-  setZone('sz-midL', midPct);
-  setZone('sz-midR', midPct);
-  setZone('sz-3pL',  threePct);
-  setZone('sz-3pR',  threePct);
-
-  // SVGラベル更新ヘルパー
-  const setLabel=(nId,sId,pId,m,a,clr)=>{
-    [nId,sId,pId].forEach(id=>{const el=document.getElementById(id);if(el)el.setAttribute('fill',clr);});
-    const s=document.getElementById(sId); if(s) s.textContent=`${m}/${a}`;
-    const p=document.getElementById(pId); if(p) p.textContent=fmt(m,a);
-  };
-  setLabel('szl-paint-n','szl-paint-s','szl-paint-p', FGM2, FGA2, _shotTextColor(paintPct));
-  setLabel('szl-midL-n', 'szl-midL-s', 'szl-midL-p',  midML,midAL,_shotTextColor(midPct));
-  setLabel('szl-midR-n', 'szl-midR-s', 'szl-midR-p',  midMR,midAR,_shotTextColor(midPct));
-  setLabel('szl-3pL-n',  'szl-3pL-s',  'szl-3pL-p',   threeML,threeAL,_shotTextColor(threePct));
-  setLabel('szl-3pR-n',  'szl-3pR-s',  'szl-3pR-p',   threeMR,threeAR,_shotTextColor(threePct));
-
-  const ftEl=document.getElementById('szl-ft');
-  if(ftEl) ftEl.textContent=`FT: ${FTM}/${FTA} (${fmt(FTM,FTA)})`;
-
-  const titleEl=document.getElementById('szl-title');
-  if(titleEl) titleEl.textContent=`#${idx+1} ${g.opponent}戦 ${g.ourScore>g.theirScore?'○':'●'}${g.ourScore}-${g.theirScore}`;
-
-  // 数値カード更新
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('sc-paint-pct', fmt(FGM2,FGA2));
-  set('sc-paint-sub', `${FGM2} / ${FGA2} 本`);
-  set('sc-mid-pct',   fmt(midM,midA));
-  set('sc-mid-sub',   `${midM} / ${midA} 本`);
-  set('sc-3p-pct',    fmt(FGM3,FGA3));
-  set('sc-3p-sub',    `${FGM3} / ${FGA3} 本`);
-  set('sc-ft-pct',    fmt(FTM,FTA));
-  set('sc-ft-sub',    `${FTM} / ${FTA} 本`);
-  set('sc-fg-pct',    fmt(FGM,FGA));
-  set('sc-fg-sub',    `${FGM} / ${FGA} 本 | ${g.ourScore}pts`);
-}
-// ===== /シュート分布機能 =====
 </script>
 </body>
 </html>
